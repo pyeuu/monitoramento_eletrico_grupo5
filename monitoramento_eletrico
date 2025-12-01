@@ -1,3 +1,6 @@
+import os
+from collections import Counter
+
 circuitos = [
     ["Circuito 1", "iluminacao", 220.0, 8.5, 0.95, 60.0, "05/11/2025"],
     ["Motor Bomba", "motor", 220.0, 14.0, 0.78, 60.0, "05/11/2025"],
@@ -14,6 +17,7 @@ limites = {
 
 tolerancia_tensao = 0.10  # 10%
 
+
 def dentro_da_faixa(circuito):
     nome, tipo, v, i, fp, f, data = circuito
     regra = limites.get(tipo, None)
@@ -26,6 +30,7 @@ def dentro_da_faixa(circuito):
     if fp < regra["fp_min"]:
         return False
     return True
+
 
 def registrar_medicao(linha):
     partes = linha.split(";")
@@ -49,12 +54,14 @@ def registrar_medicao(linha):
                 c[5] = float(medidas["f"])
             break
 
+
 def salvar_circuitos(nome_arquivo="circuitos.txt"):
     with open(nome_arquivo, "w") as arq:
         for c in circuitos:
             linha = f"{c[0]};{c[1]};{c[2]};{c[3]};{c[4]};{c[5]};{c[6]}\n"
             arq.write(linha)
     print("Circuitos salvos em", nome_arquivo)
+
 
 def gerar_relatorio_nao_conforme(nome_arquivo="relatorio_nao_conforme.txt"):
     with open(nome_arquivo, "w") as arq:
@@ -65,33 +72,124 @@ def gerar_relatorio_nao_conforme(nome_arquivo="relatorio_nao_conforme.txt"):
                 arq.write(f"  Tipo: {c[1]} | V={c[2]} V | I={c[3]} A | fp={c[4]} | f={c[5]} Hz\n\n")
     print("Relatório gerado.")
 
+
 def resumo_eletrico():
     menor_fp = min(circuitos, key=lambda x: x[4])
     fora = [c for c in circuitos if not dentro_da_faixa(c)]
     print("Circuito com menor fator de potência:", menor_fp[0], "-", menor_fp[4])
     print("Total de circuitos fora da faixa:", len(fora))
 
-def modulo_extra():
-    # implementar aqui o módulo escolhido
-    pass
-def main():
-    print("=== Sistema de Monitoramento Elétrico ===")
-    print("1 - Registrar medição")
-    print("2 - Salvar circuitos")
-    print("3 - Gerar relatório de não conformidade")
-    print("4 - Resumo elétrico")
-    print("5 - Rodar módulo extra")
+
+def registrar_falha(nome_arquivo="falhas.log"):
+    print("\n--- Registrar Falha ---")
+    print("Formato: Nome do Circuito; falha; DD/MM/AAAA HH:MM")
+    linha = input("Digite a falha: ")
+
+    with open(nome_arquivo, "a") as arq:
+        arq.write(linha + "\n")
+    print("Falha registrada com sucesso!")
+
+
+def ler_falhas(nome_arquivo="falhas.log"):
+    if not os.path.exists(nome_arquivo):
+        print("\nNenhum arquivo de falhas encontrado.")
+        return
+
+    print("\n--- Falhas Registradas ---")
+    with open(nome_arquivo, "r") as arq:
+        linhas = arq.readlines()
+
+    if not linhas:
+        print("Nenhuma falha registrada.")
+        return
+
+    for linha in linhas:
+        print(linha.strip())
+
+    print(f"\nTotal: {len(linhas)} falha(s) registrada(s)")
+
+
+def analisar_falhas(nome_arquivo="falhas.log"):
+    if not os.path.exists(nome_arquivo):
+        print("\nNenhum arquivo de falhas encontrado.")
+        return
+
+    print("\n--- Análise de Falhas ---")
+    falhas_por_circuito = Counter()
+
+    with open(nome_arquivo, "r") as arq:
+        for linha in arq:
+            linha = linha.strip()
+            if linha:
+                partes = linha.split(";")
+                if len(partes) >= 2:
+                    nome_circuito = partes[0].strip()
+                    falhas_por_circuito[nome_circuito] += 1
+
+    if not falhas_por_circuito:
+        print("Nenhuma falha registrada no arquivo.")
+        return
+
+    print("\nRelatório de Falhas por Circuito:")
+    print("-" * 40)
+    for circuito, quantidade in falhas_por_circuito.most_common():
+        print(f"{circuito} → {quantidade} falhas")
+
+    mais_falhas = falhas_por_circuito.most_common(1)[0]
+    print("-" * 40)
+    print(f"\nCircuito com mais falhas: {mais_falhas[0]} ({mais_falhas[1]} falhas)")
+
+
+def menu_falhas():
+    print("\n=== Módulo de Falhas ===")
+    print("1 - Registrar nova falha")
+    print("2 - Ler falhas registradas")
+    print("3 - Analisar falhas (relatório)")
+    print("4 - Voltar ao menu principal")
+
     opc = input("Escolha: ")
+
     if opc == "1":
-        linha = input("Digite: Nome; V=...; I=...; fp=...; f=...\n")
-        registrar_medicao(linha)
+        registrar_falha()
     elif opc == "2":
-        salvar_circuitos()
+        ler_falhas()
     elif opc == "3":
-        gerar_relatorio_nao_conforme()
+        analisar_falhas()
     elif opc == "4":
-        resumo_eletrico()
-    elif opc == "5":
-        modulo_extra()
+        return
     else:
         print("Opção inválida")
+
+
+def main():
+    while True:
+        print("\n=== Sistema de Monitoramento Elétrico ===")
+        print("1 - Registrar medição")
+        print("2 - Salvar circuitos")
+        print("3 - Gerar relatório de não conformidade")
+        print("4 - Resumo elétrico")
+        print("5 - Registrar e analisar falhas")
+        print("0 - Sair")
+
+        opc = input("Escolha: ")
+
+        if opc == "1":
+            linha = input("Digite: Nome; V=...; I=...; fp=...; f=...\n")
+            registrar_medicao(linha)
+        elif opc == "2":
+            salvar_circuitos()
+        elif opc == "3":
+            gerar_relatorio_nao_conforme()
+        elif opc == "4":
+            resumo_eletrico()
+        elif opc == "5":
+            menu_falhas()
+        elif opc == "0":
+            print("Encerrando sistema...")
+            break
+        else:
+            print("Opção inválida")
+
+
+if __name__ == "__main__":
+    main()

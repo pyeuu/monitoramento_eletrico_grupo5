@@ -6,7 +6,7 @@ Projeto desenvolvido para a disciplina de Computação I.
 
 Integrantes do Grupo
 - Pedro Antonio de Almeida Pereira
-- Guilherme
+- Guilherme de Oliveira Mancera
 
 Funcionalidades
 - Registrar medições elétricas.

@@ -19,8 +19,3 @@ Como Rodar
 2.  Abra o notebook no Google Colab.
 3.  Execute todas as células.
 4.  Utilize o Menu Principal para navegar entre as opções.
-
-Estrutura do Projeto
-- `modulo_extra()`: Analisa histórico de falhas usando dicionários.
-- `circuitos.txt`: Banco de dados salvo dos circuitos.
-- `relatorio_nao_conforme.txt`: Alertas de circuitos perigosos.
